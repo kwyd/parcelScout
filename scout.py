@@ -2,23 +2,36 @@
 import time
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium_stealth import stealth
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.chrome.service import Service as ChromeService
+from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from bs4 import BeautifulSoup
 from webdriver_manager.chrome import ChromeDriverManager
 from pprint import pprint
 
-chrome_options = Options()
+chrome_options = webdriver.ChromeOptions()
 chrome_options.add_argument("--disable-extensions")
+chrome_options.add_argument("--headless")
 chrome_options.add_argument("--disable-gpu")
 chrome_options.add_argument("--no-sandbox") # linux only
+chrome_options.add_argument('--disable-dev-shm-usage')
+# Set a custom user agent to simulate different browsers or devices for enhanced stealth during automation
+chrome_options.add_argument('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36')
 chrome_options.headless = True # also works
-chrome_driver_path = './jeff_scout/lib/python3.11/site-packages/selenium/webdriver'
-service = ChromeService(chrome_driver_path)
-driver = webdriver.Chrome(service)
-pprint(driver)
+#chrome_driver_path = './jeff_scout/lib/python3.11/site-packages/selenium/webdriver/chrome/'
+chrome_driver_path = '/usr/bin/chromedriver'
+driver = webdriver.Chrome(options=chrome_options, executable_path=chrome_driver_path)
+
+stealth(driver,
+    languages=["en-US", "en"],
+    vendor="Google Inc.",
+    platform="Win32",
+    webgl_vendor="Intel Inc.",
+    renderer="Intel Iris OpenGL Engine",
+    fix_hairline=True)
+
 def search_county_tax_sifter(url, value_name, search_string):
 
     driver.get(url)
@@ -59,14 +72,12 @@ l_data = legislators.readlines()
 count = 0
  
 for name in l_data:
-  first, tlast = name.split("\t") 
-  last = tlast.strip()
+  first, t_last = name.split("\t") 
+  last = t_last.strip()
   for county in c_data:
-    c_name, val_name, url = county.split("\t");
+    c_name, val_name, t_url = county.split("\t");
+    url = t_url.strip()
     count += 1
-    print(c_name, last)
  
-# Example usage:
-    print(last, url, c_name, sep=" ");
     search_county_tax_sifter(url, val_name, last)
     time.sleep(5)
